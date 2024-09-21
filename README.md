@@ -34,11 +34,17 @@ How to check the make help?
 Use following command to setup the project with dependencies 
 
 $make help
+
 The following commands can be used.
 
 init:  sets up environment and installs requirements
+
 clean:  Remove build and cache files
+
 env:  Source venv and environment files for testing
+
 leave:  Cleanup and deactivate venv
+
 test:  Run pytest
+
 run: Run the entry point
