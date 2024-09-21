@@ -1,0 +1,170 @@
+#! C:\Users\shomi\Desktop\Ako\akoenv\Scripts\python.exe
+
+import pandas as pd
+import datetime
+
+def get_season(date):
+    # Ensure the input is a datetime object
+    if isinstance(date, str):
+        date = datetime.datetime.strptime(date, "%Y-%m-%d")
+    
+    # Extract the month and day
+    month = date.month
+    day = date.day
+    
+    # Define the season ranges
+    if (month == 3 and day >= 21) or (3 < month < 6) or (month == 6 and day <= 20):
+        return "SPRING"
+    elif (month == 6 and day >= 21) or (6 < month < 9) or (month == 9 and day <= 20):
+        return "SUMMER"
+    elif (month == 9 and day >= 21) or (9 < month < 12) or (month == 12 and day <= 20):
+        return "AUTUMN"
+    else:
+        return "WINTER"
+
+def find_monday(given_date):
+    # Ensure the input date is a datetime object
+    if isinstance(given_date, str):
+        given_date = datetime.datetime.strptime(given_date, '%Y-%m-%d').date()
+    
+    # Calculate the Monday date (Monday is 0, Sunday is 6)
+    monday = given_date - datetime.timedelta(days=given_date.weekday())
+    
+    return monday
+
+def is_sales_season(date):
+   # start_date_1 = '2023-06-01'  
+    start_date_1 =  datetime.datetime.strptime('2023-06-01', '%Y-%m-%d')
+    end_date_1 =  datetime.datetime.strptime('2022-07-15', '%Y-%m-%d')    
+    start_date_2 =  datetime.datetime.strptime('2023-01-01', '%Y-%m-%d')  
+    end_date_2 =  datetime.datetime.strptime('2023-02-15' , '%Y-%m-%d')
+    black_friday_date =  datetime.datetime.strptime('2023-11-24', '%Y-%m-%d')
+    if isinstance(date, str):
+        date = datetime.datetime.strptime(date, '%Y-%m-%d').date()
+    
+    return 1 if (date >= start_date_1) & (date <= end_date_1)| (date >= start_date_2) & (date <= end_date_2) | (date == black_friday_date) else 0
+
+def get_covid_season(date):
+    # Ensure the input is a datetime object
+    if isinstance(date, str):
+        date = datetime.datetime.strptime(date, "%Y-%m-%d")
+    
+    # Extract the month
+    month = date.month
+    
+    # Define COVID high-risk seasons (e.g., December to February)
+    if month in [12, 1, 2]:
+        return 1
+    else:
+        return 0
+    
+def is_public_holiday(date):
+    # Define a list of public holidays in France (example for a specific year)
+    public_holidays = [
+        datetime.date(date.year, 1, 1),      # New Year's Day
+        datetime.date(date.year, 5, 1),      # Labour Day
+        datetime.date(date.year, 7, 14),     # Bastille Day
+        datetime.date(date.year, 8, 15),     # Assumption of Mary
+        datetime.date(date.year, 11, 1),     # All Saints' Day
+        datetime.date(date.year, 12, 25)     # Christmas Day
+    ]
+    
+    # Easter-related holidays (moveable feast, so not fixed dates)
+    def easter_date(year):
+        "Returns the date of Easter for the given year."
+        a = year % 19
+        b = year // 100
+        c = year % 100
+        d = b // 4
+        e = b % 4
+        f = (b + 8) // 25
+        g = (b - f + 1) // 3
+        h = (19 * a + b - d - g + 15) % 30
+        i = c // 4
+        k = c % 4
+        l = (32 + 2 * e + 2 * i - h - k) % 7
+        m = (a + 11 * h + 22 * l) // 451
+        month = (h + l - 7 * m + 114) // 31
+        day = ((h + l - 7 * m + 114) % 31) + 1
+        return datetime.date(year, month, day)
+    
+    easter = easter_date(date.year)
+    easter_monday = easter + datetime.timedelta(days=1)
+    ascension_day = easter + datetime.timedelta(days=39)
+    pentecost_sunday = easter + datetime.timedelta(days=49)
+    pentecost_monday = easter + datetime.timedelta(days=50)
+    
+    # Add Easter-related holidays to the list
+    public_holidays.extend([
+        easter,
+        easter_monday,
+        ascension_day,
+        pentecost_sunday,
+        pentecost_monday
+    ])
+    
+    # Check if the date is a public holiday
+    return 1 if date.date() in public_holidays else 0
+
+class Pipeline:
+    def run(self):
+    
+  #      ac_df = dd.read_parquet(r'/Users/sanketpatel/Downloads/req_and_code/ac.parquet')
+  #      pos_df = dd.read_parquet(r'/Users/sanketpatel/Downloads/req_and_code/pos.parquet')
+   #     sku_df = dd.read_parquet(r'/Users/sanketpatel/Downloads/req_and_code/sku.parquet')
+    #    trans_df = dd.read_parquet(r'/Users/sanketpatel/Downloads/req_and_code/transac.parquet')
+
+        ac_df = pd.read_parquet(r'C:\Users\shomi\Desktop\Ako\AkoProj\req_and_code\ac.parquet')
+        pos_df = pd.read_parquet(r'C:\Users\shomi\Desktop\Ako\AkoProj\req_and_code\pos.parquet')
+        sku_df = pd.read_parquet(r'C:\Users\shomi\Desktop\Ako\AkoProj\req_and_code\sku.parquet')
+        trans_df = pd.read_parquet(r'C:\Users\shomi\Desktop\Ako\AkoProj\req_and_code\transac.parquet')
+
+
+
+        #data preparation
+        pos_rename_df = pos_df.rename(columns={'is_active': 'nopendays'})
+        merged_df = pd.merge(trans_df, sku_df, on='sku', how='left')
+        merged2_df = pd.merge(merged_df, ac_df, on='ac', how='left')
+        merged3_df = pd.merge(merged2_df,pos_rename_df,on = 'pos',how = 'left')
+        selected_cols = merged3_df
+        
+        # selected_cols['MondayOfWeek'] = selected_cols['date'].apply(find_monday,meta=('date', 'datetime64[ns]'))
+        # selected_cols['actual_season'] = selected_cols['date'].apply(get_season,meta=('date', 'datetime64[ns]'))
+        # selected_cols['iscovid'] = selected_cols['date'].apply(get_covid_season,meta=('date', 'datetime64[ns]'))
+        # selected_cols['is_pub_holidays'] = selected_cols['date'].apply(is_public_holiday,meta=('date', 'datetime64[ns]'))
+        # selected_cols['discount_perc']  = ((selected_cols['item_prediscount_price']-selected_cols['item_selling_price'])/selected_cols['item_prediscount_price']) * 100
+        # selected_cols['sales_season'] = selected_cols['date'].apply(is_sales_season,meta=('date', 'datetime64[ns]'))
+        
+        selected_cols['MondayOfWeek'] = selected_cols['date'].apply(find_monday)
+        selected_cols['actual_season'] = selected_cols['date'].apply(get_season)
+        selected_cols['iscovid'] = selected_cols['date'].apply(get_covid_season)
+        selected_cols['is_pub_holidays'] = selected_cols['date'].apply(is_public_holiday)
+        selected_cols['discount_perc']  = ((selected_cols['item_prediscount_price']-selected_cols['item_selling_price'])/selected_cols['item_prediscount_price']) * 100
+        selected_cols['sales_season'] = selected_cols['date'].apply(is_sales_season)
+        
+
+
+        sel_multiple = selected_cols.drop(['family', 'family2'], axis=1)
+
+
+        final_df = sel_multiple.rename(columns={'MondayOfWeek': 'ds', 'qty': 'y', 'item_prediscount_price': 'item_value__w','ac':'unique_id','collection': 'season','family_old':'family','family2_old':'family2'})
+        grouped_df = final_df.groupby(['ds','unique_id','season','sales_season','actual_season','iscovid','is_pub_holidays','color','is_active','gender','family','family2','article'])
+
+        # Compute different aggregations for different columns
+        result = grouped_df.agg({
+            'y': 'sum',
+            'item_value__w': 'mean',
+            'nopendays':'mean',
+            'discount_perc' : 'mean'
+        })
+        final = result
+        #final_reordered = final[['ds', 'unique_id', 'y', 'season', 'sales_season', 'actual_season', 'iscovid', 'is_pub_holidays', 'color', 'item_value__w','nopendays','is_active','discount_perc','gender','family','family2','article']]
+       
+      #  final_reordered.compute()
+        print(final.columns)
+        final.to_parquet("processed_data.parquet")
+
+pipeline = Pipeline()
+pipeline.run()
+
+
