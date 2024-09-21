@@ -12,9 +12,10 @@ $make test
 
 ================= test session starts ===========================
 platform darwin -- Python 3.12.6, pytest-8.3.3, pluggy-1.5.0
-rootdir: 
-/Users/sanketpatel/Downloads/req_and_code
-collected 12 items                                                                                                                           unity_test.py ............                                                                                                                  [100%]
+rootdir: /Users/sanketpatel/Downloads/req_and_code
+collected 12 items 
+
+unity_test.py .....                                         [100%]
 
 ================ 12 passed in 27.64s ==============================
 
@@ -29,7 +30,7 @@ How to check the make help?
 
 Use following command to setup the project with dependencies 
 
-sanketpatel@Sankets-MacBook-Air req_and_code % make help
+$make help
 The following commands can be used.
 
 init:  sets up environment and installs requirements
