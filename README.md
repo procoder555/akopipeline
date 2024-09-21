@@ -10,7 +10,8 @@ Use following command to setup the project with dependencies
 
 $make test
 
-================= test session starts ===========================
+================= test session starts =============================
+
 platform darwin -- Python 3.12.6, pytest-8.3.3, pluggy-1.5.0
 
 rootdir: /Users/sanketpatel/Downloads/req_and_code
